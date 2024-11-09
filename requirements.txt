@@ -1,0 +1,10 @@
+praw
+anthropic
+openai
+pyyaml
+beautifulsoup4
+lxml
+python-dotenv
+prawcore
+Image
+requests

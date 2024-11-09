@@ -1,0 +1,23 @@
+Example Comment 1:
+
+<post_title>What do you use o1-{mini, preview} for?</post_title>
+
+<post_content>As a software engineer, I've been using Claude Sonnet 3.5 extensively for code generation and questions. </post_content>
+
+<comment>It's reasonably easy to just feed o1 examples or straight up code guidelines to make it write more engineering </comment>
+
+Example Comment 2:
+
+<post_title>You are using o1 wrong</post_title>
+
+<post_content>None of the current models (4o, Sonnet 3.5, Gemini 1.5 pro) can decipher it because you need to do a lot of trial and </post_content>
+
+<comment>o1-mini "thinks too much" on instructive promots, imo. if we're talking Cursor (through API) - o1-mini cannot do what you</comment>
+
+Example Comment 3:
+
+<post_title>Realtime API Python SDK and Assistant support</post_title>
+
+<post_content>Hi, Are there plans for supporting the Realtime API in the Python API in the Python lib and integrating it with the Assistant API? I'm</post_content>
+
+<comment>I've heard that that realtime api will be getting official support in the python sdk soon, which should make things alot </comment>

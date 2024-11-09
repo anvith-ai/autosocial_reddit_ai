@@ -1,0 +1,143 @@
+Reasoning models Beta
+
+OpenAI o1 series models are new large language models trained with reinforcement learning to perform complex reasoning. o1 models think before they answer, and can produce a long internal chain of thought before responding to the user. o1 models excel in scientific reasoning, ranking in the 89th percentile on competitive programming questions (Codeforces), placing among the top 500 students in the US in a qualifier for the USA Math Olympiad (AIME), and exceeding human PhD-level accuracy on a benchmark of physics, biology, and chemistry problems (GPQA).
+
+There are two reasoning models available in the API:
+
+o1-preview: an early preview of our o1 model, designed to reason about hard problems using broad general knowledge about the world.
+o1-mini: a faster and cheaper version of o1, particularly adept at coding, math, and science tasks where extensive general knowledge isn't required.
+o1 models offer significant advancements in reasoning, but they are not intended to replace GPT-4o in all use-cases.
+
+For applications that need image inputs, function calling, or consistently fast response times, the GPT-4o and GPT-4o mini models will continue to be the right choice. However, if you're aiming to develop applications that demand deep reasoning and can accommodate longer response times, the o1 models could be an excellent choice. We're excited to see what you'll create with them!
+
+o1 models are currently in beta
+
+The o1 models are currently in beta with limited features. Access is limited to developers in certain usage tiers (check your usage tier here), with low rate limits. We are working on adding more features, increasing rate limits, and expanding access to more developers in the coming weeks!
+Quickstart
+Both o1-preview and o1-mini are available through the chat completions endpoint.
+
+Using the o1-preview model
+python
+
+python
+from openai import OpenAI
+client = OpenAI()
+
+response = client.chat.completions.create(
+    model="o1-preview",
+    messages=[
+        {
+            "role": "user", 
+            "content": "Write a bash script that takes a matrix represented as a string with format '[1,2],[3,4],[5,6]' and prints the transpose in the same format."
+        }
+    ]
+)
+
+print(response.choices[0].message.content)
+Depending on the amount of reasoning required by the model to solve the problem, these requests can take anywhere from a few seconds to several minutes.
+
+Beta Limitations
+During the beta phase, many chat completion API parameters are not yet available. Most notably:
+
+Modalities: text only, images are not supported.
+Message types: user and assistant messages only, system messages are not supported.
+Streaming: not supported.
+Tools: tools, function calling, and response format parameters are not supported.
+Logprobs: not supported.
+Other: temperature, top_p and n are fixed at 1, while presence_penalty and frequency_penalty are fixed at 0.
+Assistants and Batch: these models are not supported in the Assistants API or Batch API.
+We will be adding support for some of these parameters in the coming weeks as we move out of beta. Features like multimodality and tool usage will be included in future models of the o1 series.
+
+How reasoning works
+The o1 models introduce reasoning tokens. The models use these reasoning tokens to "think", breaking down their understanding of the prompt and considering multiple approaches to generating a response. After generating reasoning tokens, the model produces an answer as visible completion tokens, and discards the reasoning tokens from its context.
+
+Here is an example of a multi-step conversation between a user and an assistant. Input and output tokens from each step are carried over, while reasoning tokens are discarded.
+
+Reasoning tokens aren't retained in context
+
+While reasoning tokens are not visible via the API, they still occupy space in the model's context window and are billed as output tokens.
+
+Managing the context window
+The o1-preview and o1-mini models offer a context window of 128,000 tokens. Each completion has an upper limit on the maximum number of output tokens—this includes both the invisible reasoning tokens and the visible completion tokens. The maximum output token limits are:
+
+o1-preview: Up to 32,768 tokens
+o1-mini: Up to 65,536 tokens
+It's important to ensure there's enough space in the context window for reasoning tokens when creating completions. Depending on the problem's complexity, the models may generate anywhere from a few hundred to tens of thousands of reasoning tokens. The exact number of reasoning tokens used is visible in the usage object of the chat completion response object, under completion_tokens_details:
+
+Chat completions usage
+json
+
+json
+usage: {
+  total_tokens: 1000,
+  prompt_tokens: 400,
+  completion_tokens: 600,
+  completion_tokens_details: {
+    reasoning_tokens: 500
+  }
+}
+Controlling costs
+To manage costs with the o1 series models, you can limit the total number of tokens the model generates (including both reasoning and completion tokens) by using the max_completion_tokens parameter.
+
+In previous models, the max_tokens parameter controlled both the number of tokens generated and the number of tokens visible to the user, which were always equal. However, with the o1 series, the total tokens generated can exceed the number of visible tokens due to the internal reasoning tokens.
+
+Because some applications might rely on max_tokens matching the number of tokens received from the API, the o1 series introduces max_completion_tokens to explicitly control the total number of tokens generated by the model, including both reasoning and visible completion tokens. This explicit opt-in ensures no existing applications break when using the new models. The max_tokens parameter continues to function as before for all previous models.
+
+Allocating space for reasoning
+If the generated tokens reach the context window limit or the max_completion_tokens value you've set, you'll receive a chat completion response with the finish_reason set to length. This might occur before any visible completion tokens are produced, meaning you could incur costs for input and reasoning tokens without receiving a visible response.
+
+To prevent this, ensure there's sufficient space in the context window or adjust the max_completion_tokens value to a higher number. OpenAI recommends reserving at least 25,000 tokens for reasoning and outputs when you start experimenting with these models. As you become familiar with the number of reasoning tokens your prompts require, you can adjust this buffer accordingly.
+
+Advice on prompting
+These models perform best with straightforward prompts. Some prompt engineering techniques, like few-shot prompting or instructing the model to "think step by step," may not enhance performance and can sometimes hinder it. Here are some best practices:
+
+Keep prompts simple and direct: The models excel at understanding and responding to brief, clear instructions without the need for extensive guidance.
+Avoid chain-of-thought prompts: Since these models perform reasoning internally, prompting them to "think step by step" or "explain your reasoning" is unnecessary.
+Use delimiters for clarity: Use delimiters like triple quotation marks, XML tags, or section titles to clearly indicate distinct parts of the input, helping the model interpret different sections appropriately.
+Limit additional context in retrieval-augmented generation (RAG): When providing additional context or documents, include only the most relevant information to prevent the model from overcomplicating its response.
+Prompt examples
+OpenAI o1 series models are able to implement complex algorithms and produce code. This prompt asks o1 to refactor a React component based on some specific criteria.
+
+OpenAI o1-preview
+o1-preview is our new reasoning model for complex tasks. The model has 128K context and an October 2023 knowledge cutoff.
+
+Learn about o1-preview
+Model
+Pricing
+o1-preview
+$15.00 / 1M input tokens
+$7.50 / 1M cached* input tokens
+$60.00 / 1M output** tokens
+o1-preview-2024-09-12
+$15.00 / 1M input tokens
+$7.50 / 1M cached* input tokens
+$60.00 / 1M output** tokens
+*Output tokens include internal reasoning tokens generated by the model that are not visible in API responses.
+
+OpenAI o1-mini
+o1-mini is a fast, cost-efficient reasoning model tailored to coding, math, and science use cases. The model has 128K context and an October 2023 knowledge cutoff.
+
+Learn about o1-mini
+Model
+Pricing
+o1-mini
+$3.00 / 1M input tokens
+$1.50 / 1M cached* input tokens
+$12.00 / 1M output* tokens
+o1-mini-2024-09-12
+$3.00 / 1M input tokens
+$1.50 / 1M cached* input tokens
+$12.00 / 1M output* tokens
+*Output tokens include internal reasoning tokens generated by the model that are not visible in API responses.
+
+My thoughts on o1 models:
+
+I've been impressed by the O1 models, particularly for tasks that require following complex instructions. The 64K output window is a game-changer, especially for code generation.
+
+Personally, I've found the O1 preview model to be exceptionally well-suited for code generation tasks, even more so than the O1 mini.
+
+While the reasoning steps in the O1 series can lead to slower response times, they generally yield high-quality results.
+
+However, the current API limitations, such as the lack of system messages, streaming, and multimodal inputs, are notable drawbacks.
+
+Overall, I'm optimistic about the future of the O1 series and eagerly anticipate the full release.
