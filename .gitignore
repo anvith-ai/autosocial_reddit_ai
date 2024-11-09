@@ -34,7 +34,7 @@ Thumbs.db
 *.log
 
 # Environment variables
-.env
+
 
 # Database files
 *.db

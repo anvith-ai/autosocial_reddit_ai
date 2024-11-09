@@ -58,7 +58,7 @@ autosocial_reddit_ai/
 ├── context.txt
 ├── rules.txt
 └── replied_posts.txt
-├── upload_knowledge.py
+├── load.py
 └── knowledge.txt
 ```
 
